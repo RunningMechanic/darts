@@ -20,7 +20,7 @@ class ScoreboardPage extends StatefulWidget {
 class ScoreboardPageState extends State<ScoreboardPage> {
   List<Widget> widgets = [];
   WebSocketChannel? channel;
-
+  var json=[];
   @override
   void initState() {
     super.initState();
@@ -29,40 +29,9 @@ class ScoreboardPageState extends State<ScoreboardPage> {
 
   void initialize() {
     channel = IOWebSocketChannel.connect(websocketURL(widget.serverIp!));
-    final json = [];
     channel?.stream.listen((message) {
       final data = jsonDecode(message);
       widgets = [];
-      // if (data["protocol"] == 10) {
-      //   // 消したい項目: text, color, score が一致するもの
-      //   String targetText = data['text'];
-      //   String targetColor = data['color'];
-      //   int targetScore = data['score'];
-      //
-      //   setState(() {
-      //     // widgets の内容を検索して一致するウィジェットを削除
-      //     widgets.removeWhere((widget) {
-      //       if (widget is Column) {
-      //         final row = widget.children.first as Row;
-      //         final textWidget = row.children[1] as Text;
-      //         final scoreWidget = row.children.last as Text;
-      //
-      //         // Text ウィジェットのデータ取得
-      //         String widgetText = textWidget.data!;
-      //         String widgetColor = widgetText.split(' ')[1]; // 色を取り出す仮の処理
-      //         int widgetScore = int.parse(scoreWidget.data!);
-      //
-      //         // text, color, score が一致するかをチェック
-      //         return widgetText == targetText &&
-      //             widgetColor == targetColor &&
-      //             widgetScore == targetScore;
-      //       }
-      //       return false;
-      //     });
-      //   });
-      //   //既に表示されているwidgetから上限が合うwidgetsの一部を消す。
-      //   //"{\"protocol\":10,\"ip\":\"${arg[0]}\",\"laneNum\":${arg[1]},\"text\":\"${arg[2]}\",\"color\":\"${arg[3]}\",\"score\":${arg[4]}}"
-      // }
       if (data["protocol"] != 5) return;
       json.add(data);
       setState(() {
@@ -89,15 +58,15 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                 children: [
                   Text(
                     'No.$i / ',
-                    style: const TextStyle(fontSize: 60),
+                    style: const TextStyle(fontSize: 50),
                   ),
                   Text("「${entry['text']} 」 様",
                       style: TextStyle(
-                          fontSize: 60,
+                          fontSize: 50,
                           color: Color(int.parse(entry['color'])))),
                   const Spacer(),
                   Text("${entry['score']} 点",
-                      style: const TextStyle(fontSize: 60)),
+                      style: const TextStyle(fontSize: 50)),
                 ],
               ),
             ],
@@ -130,7 +99,7 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                     context: context,
                     builder: (_) {
                       return AlertDialog(
-                        title: const Text('どの順位のデータを消しますか？'),
+                        title: const Text('下から何番目を消しますか？'),
                         actions: <Widget>[
                           ElevatedButton(
                             child: const Text('1'),
@@ -139,9 +108,11 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                               if (widgets.isNotEmpty) {
                                 setState(() {
                                   widgets.removeAt(0);
+                                  json.removeAt(0);
+                                  sort(json);
                                 });
                               }
-                              Navigator.pop(context);
+                              //Navigator.pop(context);
                             },
                           ),
                           ElevatedButton(
@@ -149,10 +120,16 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                             onPressed: () {
                               if (widgets.length >= 2) {
                                 setState(() {
+                                  print(widgets);
+                                  print(json);
                                   widgets.removeAt(1);
+                                  json.removeAt(1);
+                                  sort(json);
+                                  print(widgets);
+                                  print(json);
                                 });
                               }
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                             },
                           ),
                           ElevatedButton(
@@ -161,9 +138,11 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                               if (widgets.length >= 3) {
                                 setState(() {
                                   widgets.removeAt(2);
+                                  json.removeAt(2);
+                                  sort(json);
                                 });
                               }
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                             },
                           ),
                           ElevatedButton(
@@ -172,9 +151,11 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                               if (widgets.length >= 4) {
                                 setState(() {
                                   widgets.removeAt(3);
+                                  json.removeAt(3);
+                                  sort(json);
                                 });
                               }
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                             },
                           ),
                           ElevatedButton(
@@ -183,9 +164,11 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                               if (widgets.length >= 5) {
                                 setState(() {
                                   widgets.removeAt(4);
+                                  json.removeAt(4);
+                                  sort(json);
                                 });
                               }
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                             },
                           ),
                         ],
@@ -193,46 +176,53 @@ class ScoreboardPageState extends State<ScoreboardPage> {
                     });
               },
               child:
-                  const Text("=> 本日のランキング <=", style: TextStyle(fontSize: 50))),
+                  const Text("=> 本日のランキング <=", style: TextStyle(fontSize: 40))),
           ...widgets,
-          const Text("=> 昨日のランキング <=", style: TextStyle(fontSize: 50)),
-          const Row(
-            children: [
-              Text("No.1 /「ひよ」 様", style: TextStyle(fontSize: 50)),
-              Spacer(),
-              Text("129 点", style: TextStyle(fontSize: 50)),
-            ],
-          ),
-          const Row(
-            children: [
-              Text("No.2 /「こばれん」 様", style: TextStyle(fontSize: 50)),
-              Spacer(),
-              Text("120 点", style: TextStyle(fontSize: 50)),
-            ],
-          ),
-          const Row(
-            children: [
-              Text("No.3 /「ゆうな」 様", style: TextStyle(fontSize: 50)),
-              Spacer(),
-              Text("120 点", style: TextStyle(fontSize: 50)),
-            ],
-          ),
-          const Row(
-            children: [
-              Text("No.4 /「null」 様", style: TextStyle(fontSize: 50)),
-              Spacer(),
-              Text("117 点", style: TextStyle(fontSize: 50)),
-            ],
-          ),
-          const Row(
-            children: [
-              Text("No.5 /「みらい」 様", style: TextStyle(fontSize: 50)),
-              Spacer(),
-              Text("110 点", style: TextStyle(fontSize: 50)),
-            ],
-          ),
         ]),
       ),
     );
+  }
+  void sort(json){
+    final entries = <Map<String, dynamic>>[];
+    for (final row in json) {
+      final lane = row['laneNum'] as int;
+      final text = row['text'] as String;
+      final color = row['color'] as String;
+      final score = row['score'] as int;
+
+      entries.add(
+          {'lane': lane, 'text': text, 'color': color, 'score': score});
+    }
+
+    entries.sort((a, b) => b['score'].compareTo(a['score']));
+    int i = 0;
+    widgets=[];
+    for (final entry in entries) {
+      i++;
+      widgets.add(Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No.$i / ',
+                style: const TextStyle(fontSize: 50),
+              ),
+              Text("「${entry['text']} 」 様",
+                  style: TextStyle(
+                      fontSize: 50,
+                      color: Color(int.parse(entry['color'])))),
+              const Spacer(),
+              Text("${entry['score']} 点",
+                  style: const TextStyle(fontSize: 50)),
+            ],
+          ),
+        ],
+      ));
+      if (widgets.length > 5) {
+        widgets.removeLast();
+      }
+    }
   }
 }

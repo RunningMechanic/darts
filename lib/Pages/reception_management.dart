@@ -33,7 +33,7 @@ class ReceptionManagementPageState extends State<ReceptionManagementPage> {
     channel?.stream.listen((message) {
       final data = jsonDecode(message);
       if (data['protocol'] == 3) {
-        _removeNullLanes();
+        _removeNullLanes(data["text"]);
         _handleProtocol3Message(data);
       } else if (data['protocol'] == 2) {
         _addNewMessage(data);
@@ -259,8 +259,8 @@ class ReceptionManagementPageState extends State<ReceptionManagementPage> {
     );
   }
 
-  void _removeNullLanes() {
-    json.removeWhere((row) => row['protocol'] == 2);
+  void _removeNullLanes(a) {
+    json.removeWhere((row) => row['protocol'] == 2 && row["text"] == a);
     widgetSet({});
   }
 }

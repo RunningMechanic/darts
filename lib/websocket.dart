@@ -36,7 +36,11 @@ WebSocket? getWebSocket() {
 }
 
 String websocketURL(String ip) {
+  if (ip.contains("tksn.me")) {
+    return "wss://$ip/ws";
+  } else {
     return "ws://$ip:3000/ws";
+  }
 }
 
 String sendJson(int protocol, List<String> arg) {
